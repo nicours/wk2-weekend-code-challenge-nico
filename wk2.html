@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Shopping List</title>
+    <style>
+        .purchased {
+            text-decoration: line-through;
+            background-color: #d3d3d3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shopping List</h1>
+    <input type="text" id="itemInput" placeholder="Enter an item">
+    <button id="addItemBtn">Add</button>
+    <button id="clearListBtn">Clear List</button>
+    <ul id="shoppingList"></ul>
+
+    <script>
+        let shoppingList = [];
+
+        // DOM Elements
+        const itemInput = document.getElementById('itemInput');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const clearListBtn = document.getElementById('clearListBtn');
+        const shoppingListContainer = document.getElementById('shoppingList');
+
+        // Load list from local storage on page load
+        window.onload = loadList;
+
+        // Add item to the list
+        addItemBtn.addEventListener('click', () => {
+            const itemName = itemInput.value.trim();
+            if (itemName) {
+                shoppingList.push({ name: itemName, purchased: false });
+                renderList();
+                itemInput.value = '';
+            }
+        });
+
+        // Mark item as purchased
+        shoppingListContainer.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                const itemIndex = event.target.dataset.index;
+                shoppingList[itemIndex].purchased = !shoppingList[itemIndex].purchased;
+                renderList();
+            }
+        });
+
+        // Add event listener to edit item
+        shoppingListContainer.addEventListener('dblclick', (event) => {
+            if (event.target.tagName === 'LI') {
+                const itemIndex = event.target.dataset.index;
+                const newValue = prompt('Edit item:', shoppingList[itemIndex].name);
+                if (newValue) {
+                    shoppingList[itemIndex].name = newValue.trim();
+                    renderList();
+                }
+            }
+        });
+
+        // Clear the list
+        clearListBtn.addEventListener('click', () => {
+            shoppingList = [];
+            renderList();
+        });
+
+        // Render the list
+        function renderList() {
+            shoppingListContainer.innerHTML = '';
+            shoppingList.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = item.name;
+                listItem.dataset.index = index;
+                if (item.purchased) {
+                    listItem.classList.add('purchased');
+                }
+                shoppingListContainer.appendChild(listItem);
+            });
+            saveList();
+        }
+
+        // Save list to local storage
+        function saveList() {
+            localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+        }
+
+        // Load list from local storage
+        function loadList() {
+            const storedList = localStorage.getItem('shoppingList');
+            if (storedList) {
+                shoppingList = JSON.parse(storedList);
+                renderList();
+            }
+        }
+    </script>
+</body>
+</html>
+
